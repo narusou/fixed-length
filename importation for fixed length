@@ -1,0 +1,50 @@
+Sub torikomi()
+    Dim path As String
+    Dim path1 As String
+    Dim path2 As String
+    path1 = Sheets("Sheet2").Cells(2, 1)
+    path2 = Sheets("Sheet2").Cells(3, 1)
+    path = path1 & "\" & path2
+    torikomi1 (path)
+End Sub
+
+
+Function torikomi1(path As String)
+    Sheets("Sheet1").Cells.Clear
+    With Sheets("Sheet1").QueryTables.Add(Connection:="TEXT;" & path, Destination:=Sheets("sheet1").Range("A1"))
+    .Name = "test"
+    .FieldNames = True
+    .RowNumbers = False
+    .RefreshPeriod = 0
+    .RefreshOnFileOpen = False
+    .Refresh BackgroundQuery:=False
+    .RefreshStyle = xlInsertEntireRows
+    .SavePassword = False
+    .SaveData = True
+    .FillAdjacentFormulas = False
+    .PreserveFormatting = True
+    .AdjustColumnWidth = True
+    .TextFilePromptOnRefresh = False
+    .TextFileStartRow = 1
+    .TextFilePlatform = 932
+    .TextFilePlatform = xlWindows
+    .TextFileParseType = xlFixedWidth
+    .TextFileTextQualifier = xlTextQualifierDoubleQuote
+    .TextFileConsecutiveDelimiter = False
+    .TextFileTabDelimiter = False
+    .TextFileSemicolonDelimiter = False
+    .TextFileCommaDelimiter = False
+    .TextFileSpaceDelimiter = False
+    .TextFileTrailingMinusNumbers = True
+    .TextFileColumnDataTypes = Array(5, 9, 1, 9, 2)
+    .TextFileFixedColumnWidths = Array(10, 2, 8, 4, 200)
+    .Refresh
+    .Refresh BackgroundQuery:=False
+    .Parent.Names(.Name).Delete
+    .Delete
+    End With
+End Function
+
+
+
+
