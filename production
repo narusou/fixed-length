@@ -1,0 +1,138 @@
+
+Sub 固定長データ読み込み()
+   Dim buf
+
+   Application.ScreenUpdating = False
+   buf = Range("C21")
+    Worksheets("READ").Activate
+    'アクティブシートの内容を全て削除
+    ActiveSheet.Cells.Clear
+    'アクティブシートのコメントを全て削除
+    
+    Worksheets("masterkey").Activate
+
+
+        Columns("A:A").Select
+        Selection.ClearContents
+ 
+    
+    Worksheets("並び替え").Activate
+      'アクティブシートの図形・画像を全て削除
+    ActiveSheet.DrawingObjects.Delete
+    'アクティブシートの内容を全て削除
+    ActiveSheet.Cells.Clear
+    'アクティブシートのコメントを全て削除
+    ActiveSheet.Cells.ClearComments
+    
+    Worksheets("READ").Activate
+    
+    'テキストファイル(固定長データ)を読み込む
+    'カラムの桁は「csv」にカンマ区切りでセットしておく。
+
+    Dim file_name, filestring, filepath
+    'ファイル(固定長データ)の選択
+    With Application.FileDialog(msoFileDialogFilePicker)
+        .Title = "ファイルを選択"
+        .AllowMultiSelect = False
+        .Show
+        file_name = .SelectedItems(1)
+        
+        Worksheets("Operation").Range("D23").Value = file_name
+        filestring = Worksheets("Operation").Range("C23").Value
+        filepath = Worksheets("Operation").Range("E23").Value
+    End With
+    
+    'ファイルの読み込み
+    Cells.ClearContents
+    torikomi1 (file_name)
+    Worksheets("関数").Activate
+    Worksheets("関数").Range("A1:D1").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Selection.Copy
+    Worksheets("並び替え").Activate
+    Range("A1").Select
+    ActiveSheet.Paste
+    
+    With ActiveWorkbook.Worksheets("並び替え").Sort
+        .SortFields.Clear
+        .SortFields.Add Key:=Range("B1"), Order:=xlDescending
+        .SetRange Range("A1:D10000")
+        .Header = xlYes
+        .Apply
+    End With
+    
+    Worksheets("判定").Activate
+    Worksheets("判定").AutoFilterMode = False
+    ActiveSheet.Range("$A$1:$F$10000").AutoFilter field:=5, Criteria1:="!"
+    
+    Columns("H:H").SpecialCells(xlCellTypeVisible).Select
+    Selection.Copy
+    Worksheets("masterkey").Activate
+    Columns("A:A").Select
+      ActiveSheet.Paste
+    
+      Worksheets("判定").Activate
+      Worksheets("判定").AutoFilterMode = False
+       ActiveSheet.Range("$A$1:$H$10000").AutoFilter field:=7, Criteria1:="<>"
+     
+    Columns("A:H").SpecialCells(xlCellTypeVisible).Select
+    Selection.Copy
+    
+      Cells.SpecialCells(xlCellTypeVisible).Copy
+      Worksheets("関数なし").Activate
+      Range("A1").Select
+      ActiveSheet.Paste
+    
+      Worksheets("master").Activate
+     Cells.Copy
+  Workbooks.Add Range("A1").Select
+  Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, _
+  SkipBlanks:=False, Transpose:=False
+    Range("A1:E1").Interior.ColorIndex = 16
+    Range("B:B").Select
+    Selection.Font.ColorIndex = 3
+    Range("B1").Font.ColorIndex = 1
+    
+  ChDir filepath
+  ActiveWorkbook.SaveAs (filestring & "_checked_" & buf & ".xlsx")
+  ActiveWorkbook.Close
+   
+  Worksheets("Operation").Activate
+      MsgBox "完了しました。デスクトップのファイルをご確認ください。"
+    
+End Sub
+
+Function torikomi1(file_name As String)
+    Sheets("READ").Cells.Clear
+    With Sheets("READ").QueryTables.Add(Connection:="TEXT;" & file_name, Destination:=Sheets("READ").Range("A1"))
+    .Name = "test"
+    .FieldNames = True
+    .RowNumbers = False
+    .RefreshPeriod = 0
+    .RefreshOnFileOpen = False
+    .Refresh BackgroundQuery:=False
+    .RefreshStyle = xlInsertEntireRows
+    .SavePassword = False
+    .SaveData = True
+    .FillAdjacentFormulas = False
+    .PreserveFormatting = True
+    .AdjustColumnWidth = True
+    .TextFilePromptOnRefresh = False
+    .TextFileStartRow = 1
+    .TextFilePlatform = 932
+    .TextFilePlatform = xlWindows
+    .TextFileParseType = xlFixedWidth
+    .TextFileConsecutiveDelimiter = False
+    .TextFileTabDelimiter = False
+    .TextFileSemicolonDelimiter = False
+    .TextFileCommaDelimiter = False
+    .TextFileSpaceDelimiter = False
+    .TextFileTrailingMinusNumbers = True
+    .TextFileColumnDataTypes = Array(1, 1, 1, 1, 2, 1)
+    .TextFileFixedColumnWidths = Array(6, 11, 8, 12, 10, 12)
+    .Refresh
+    .Refresh BackgroundQuery:=False
+    .Parent.Names(.Name).Delete
+    .Delete
+    End With
+End Function
